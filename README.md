@@ -56,3 +56,7 @@ Displays success and error toast notifications.
 ```bash
 git clone https://github.com/allanjustine/Coordinate-Listings.git
 cd Coordinate-Listings
+composer install
+php artisan migrate
+php artisan storage:link
+composer run dev
