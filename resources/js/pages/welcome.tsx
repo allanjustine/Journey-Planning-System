@@ -341,7 +341,7 @@ const App = ({ coordinates }: { coordinates: MarkerType[] }) => {
             </Activity>
             <Activity
                 mode={
-                    !isRouteToRoute && coordinates?.length > 2
+                    !isRouteToRoute && coordinates?.length > 1
                         ? 'visible'
                         : 'hidden'
                 }
