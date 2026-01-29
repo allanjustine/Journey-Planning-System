@@ -204,7 +204,11 @@ const App = ({ coordinates }: { coordinates: MarkerType[] }) => {
                 </AlertDialogContent>
             </AlertDialog>
             <MapContainer
-                center={coordinates ? coordinates[0] : [12.157802, 122.705489]}
+                center={
+                    coordinates?.length > 0
+                        ? coordinates[0]
+                        : [12.157802, 122.705489]
+                }
                 zoom={7}
                 style={{ height: '100%', width: '100%' }}
             >
