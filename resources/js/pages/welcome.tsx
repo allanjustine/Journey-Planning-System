@@ -104,7 +104,10 @@ const App = ({ coordinates }: { coordinates: MarkerType[] }) => {
             preserveScroll: true,
             replace: true,
             onSuccess: () => setOpen(false),
-            onBefore: () => setIsLoading(true),
+            onBefore: () => {
+                setIsLoading(true);
+                setError({ title: '', icon: '' });
+            },
             onFinish: () => setIsLoading(false),
             onError: (errors) => {
                 setError(errors);
