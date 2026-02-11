@@ -91,7 +91,7 @@ class CoordinateController extends Controller
      */
     public function destroy(Coordinate $coordinate)
     {
-        $coordinate->icon && Storage::disk('public')->delete($coordinate->icon);
+        Storage::disk('public')->delete($coordinate->icon);
 
         $coordinate->delete();
 
