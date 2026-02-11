@@ -1,4 +1,4 @@
-# 📍 Map Coordinate Listings
+# 📍 Journey Planning System
 
 A modern React + Laravel Inertia application for saving, viewing, and managing map coordinates using **Leaflet.js**.
 
@@ -54,8 +54,8 @@ Displays success and error toast notifications.
 
 ### 1. Clone repository
 ```bash
-git clone https://github.com/allanjustine/Coordinate-Listings.git
-cd Coordinate-Listings
+git clone https://github.com/allanjustine/Journey-Planning-System.git
+cd Journey-Planning-System
 composer install
 php artisan key:generate
 php artisan migrate
