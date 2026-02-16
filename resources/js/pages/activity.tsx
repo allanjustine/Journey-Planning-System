@@ -1,5 +1,6 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { Activity } from '@/types/activity';
+import { Button } from '@/components/ui/button';
 import {
     Popover,
     PopoverContent,
@@ -9,6 +10,8 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover';
 import fullDateFormat from '@/utils/full-date-format';
+import { router } from '@inertiajs/react';
+import { Spinner } from '@/components/ui/spinner';
 
 export function AvtivityPopOver({
     activities,
@@ -17,6 +20,15 @@ export function AvtivityPopOver({
     activities?: Activity[];
     children?: ReactNode;
 }) {
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const handleDeleteActivity = (id: number) => () => {
+        router.delete(route('activities.destroy', id), {
+            preserveScroll: true,
+            replace: true,
+            onBefore: () => setIsLoading(true),
+            onFinish: () => setIsLoading(false),
+        });
+    };
     return (
         <Popover>
             <PopoverTrigger asChild>{children}</PopoverTrigger>
@@ -33,9 +45,9 @@ export function AvtivityPopOver({
                     {activities?.map((activity, index) => (
                         <div
                             key={index}
-                            className="rounded-md border p-2 hover:bg-gray-100 dark:hover:bg-gray-800 flex flex-col gap-1"
+                            className="flex flex-col gap-1 rounded-md border p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
                         >
-                            <span className="text-xs font-thin italic self-center underline">
+                            <span className="self-center text-xs font-thin italic underline">
                                 {fullDateFormat(activity.created_at)}
                             </span>
                             <h4 className="text-md font-semibold break-all whitespace-break-spaces">
@@ -44,6 +56,16 @@ export function AvtivityPopOver({
                             <p className="text-sm break-all whitespace-break-spaces">
                                 {activity.description}
                             </p>
+                            <Button
+                                type="button"
+                                size="sm"
+                                disabled={isLoading}
+                                variant={'destructive'}
+                                className="cursor-pointer"
+                                onClick={handleDeleteActivity(activity.id)}
+                            >
+                                {isLoading ? <Spinner /> : 'Delete'}
+                            </Button>
                         </div>
                     ))}
                 </div>

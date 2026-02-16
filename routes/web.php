@@ -8,11 +8,11 @@ use Laravel\Fortify\Features;
 
 Route::redirect('/', 'coordinates');
 
-Route::get('dashboard', function () {
-    return Inertia::render('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::redirect('dashboard', 'coordinates')->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::resource('coordinates', CoordinateController::class);
-Route::resource('activities', ActivityController::class);
+Route::middleware('auth')->group(function () {
+    Route::resource('coordinates', CoordinateController::class);
+    Route::resource('activities', ActivityController::class);
+});
 
 require __DIR__ . '/settings.php';

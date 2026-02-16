@@ -86,9 +86,9 @@ export function AddActivity({
                     </DialogHeader>
                     <div className="grid gap-4">
                         <div className="grid gap-3">
-                            <Label htmlFor="name">Your name</Label>
+                            <Label htmlFor="name">Title</Label>
                             <Input
-                                placeholder="Enter your name"
+                                placeholder="Enter title"
                                 {...register('name')}
                             />
                             <InputError message={errors?.name?.message} />
