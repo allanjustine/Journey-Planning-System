@@ -13,4 +13,9 @@ class Coordinate extends Model
     {
         return $this->hasMany(Activity::class);
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
