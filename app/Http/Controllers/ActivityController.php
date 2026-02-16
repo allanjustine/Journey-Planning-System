@@ -73,8 +73,10 @@ class ActivityController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Activity $activity)
     {
-        //
+        $activity->delete();
+
+        return to_route('coordinates.index')->with('success', "{$activity->name} activity deleted successfully.");
     }
 }
