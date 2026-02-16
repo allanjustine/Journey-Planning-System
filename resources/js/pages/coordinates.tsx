@@ -1,8 +1,15 @@
 import { router, usePage } from '@inertiajs/react';
-import { ArrowUpRightIcon } from 'lucide-react';
+import { ArrowUpRightIcon, LogOutIcon } from 'lucide-react';
 import L from 'leaflet';
 import { AddActivity } from '@/components/add-activity';
-import { Activity, ChangeEvent, FormEvent, useState } from 'react';
+import {
+    Activity,
+    ChangeEvent,
+    FormEvent,
+    useEffect,
+    useRef,
+    useState,
+} from 'react';
 import { MarkerType } from '@/types/marker';
 import {
     MapContainer,
@@ -31,6 +38,7 @@ import Routing from '@/hooks/use-routing';
 import useToast from '@/hooks/use-toast';
 import IconDefault from '@/utils/icon-default';
 import { AvtivityPopOver } from './activity';
+import { toast } from 'sonner';
 
 const ClickHandler = ({
     onClick,
@@ -85,6 +93,81 @@ const App = ({ coordinates }: { coordinates: MarkerType[] }) => {
     const [id, setId] = useState<number>(0);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
     const [markerItem, setMarkerItem] = useState<MarkerType>({} as MarkerType);
+    const [currentLocation, setCurrentLocation] = useState<{
+        lat: number;
+        lng: number;
+    }>({
+        lat: 0,
+        lng: 0,
+    });
+    const toastRef = useRef<boolean>(false);
+
+    useEffect(() => {
+        if (toastRef.current) return;
+
+        toastRef.current = true;
+
+        const checkPermission = async () => {
+            const permission = await navigator.permissions.query({
+                name: 'geolocation',
+            });
+
+            if (permission.state === 'granted') {
+                toast.success('Good Job!', {
+                    position: 'top-center',
+                    duration: 10000,
+                    description:
+                        'Your location has been turned on. Enjoy the experience. Have a nice journey!',
+                });
+            }
+
+            if (permission.state === 'denied') {
+                toast.error('Ops, something went wrong.', {
+                    position: 'top-center',
+                    duration: 10000,
+                    description:
+                        'Please turn on your location for better experience. Thank you!',
+                });
+            }
+
+            if (permission.state === 'prompt') {
+                toast.error('Enable Location', {
+                    position: 'top-center',
+                    duration: 10000,
+                    description:
+                        'Turning on location will let us show where you are on the map for a better experience. Do you want to enable it?',
+                });
+            }
+        };
+
+        checkPermission();
+    }, []);
+
+    useEffect(() => {
+        const watchItem = navigator.geolocation.watchPosition(
+            (position) => {
+                setCurrentLocation({
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude,
+                });
+            },
+            () => {
+                toast.error('Ops, something went wrong.', {
+                    position: 'top-center',
+                    duration: 10000,
+                    description:
+                        'We could not get your current location. Please try again. Thank you!',
+                });
+            },
+            {
+                enableHighAccuracy: true,
+                maximumAge: 0,
+                timeout: 5000,
+            },
+        );
+
+        return () => navigator.geolocation.clearWatch(watchItem);
+    }, []);
 
     const addMarker = (latlng: { lat: number; lng: number }) => {
         setOpen(true);
@@ -255,6 +338,23 @@ const App = ({ coordinates }: { coordinates: MarkerType[] }) => {
                         addMarker(latlng);
                     }}
                 />
+                <Marker
+                    position={currentLocation}
+                    icon={L.divIcon({
+                        className: 'animate-pulse',
+                        html: `<div style="
+                                width: 24px;
+                                height: 24px;
+                                background: #2563eb;
+                                border-radius: 50%;
+                                border: 4px solid white;
+                                box-shadow: 0 0 0 4px rgba(37,99,235,0.3);
+                                "></div>`,
+                        iconSize: [32, 32],
+                        iconAnchor: [16, 16],
+                    })}
+                />
+
                 {coordinates?.map((m, index) => (
                     <Marker
                         key={index}
@@ -343,6 +443,13 @@ const App = ({ coordinates }: { coordinates: MarkerType[] }) => {
                     {panelText} Map Panel List
                 </Button>
             </Activity>
+            <Button
+                type="button"
+                onClick={() => router.post(route('logout'))}
+                className="fixed top-20 left-1 z-999 bg-red-500 text-white hover:bg-red-600"
+            >
+                <LogOutIcon /> Logout
+            </Button>
             <Activity
                 mode={
                     !isRouteToRoute && coordinates?.length > 1
@@ -354,7 +461,7 @@ const App = ({ coordinates }: { coordinates: MarkerType[] }) => {
                     <div className="mb-4 flex flex-col items-center justify-center gap-2 md:flex-row">
                         <Button
                             type="button"
-                            className="bg-green-500 text-white hover:bg-green-600"
+                            className="bg-green-500 text-[8px] text-white hover:bg-green-600 md:text-sm"
                             onClick={handleOpenRouteToRoute}
                         >
                             Click to route to route between first two markers
@@ -368,7 +475,7 @@ const App = ({ coordinates }: { coordinates: MarkerType[] }) => {
                         >
                             <Button
                                 type="button"
-                                className="bg-red-500 text-white hover:bg-red-600"
+                                className="bg-red-500 text-[8px] text-white hover:bg-red-600 md:text-sm"
                                 onClick={handleResetRouteToRoute}
                             >
                                 Reset route to route between first two markers

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Activity;
 use App\Models\Coordinate;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -19,9 +20,10 @@ class CoordinateController extends Controller
         $data = Coordinate::query()
             ->with('activities')
             ->withCount('activities')
+            ->where('user_id', Auth::id())
             ->get();
 
-        return Inertia::render('welcome', [
+        return Inertia::render('coordinates', [
             'coordinates' => $data,
         ]);
     }
@@ -53,10 +55,11 @@ class CoordinateController extends Controller
         }
 
         $coordinate = Coordinate::query()->create([
-            'lat'  => $request->lat,
-            'lng'  => $request->lng,
-            'name' => Str::of($request->title)->title()->trim(),
-            'icon' => $path,
+            'lat'     => $request->lat,
+            'lng'     => $request->lng,
+            'name'    => Str::of($request->title)->title()->trim(),
+            'icon'    => $path,
+            'user_id' => Auth::id()
         ]);
 
         return to_route('coordinates.index')->with('success', "{$coordinate->name} coordinate added successfully.");
