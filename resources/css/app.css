@@ -143,7 +143,7 @@
 }
 
 .leaflet-routing-alternatives-container {
-    background-color: black;
+    background-color: rgb(220, 141, 141);
     padding: 0.5rem;
     border-radius: 5px;
     max-height: calc(100vh - 400px);
