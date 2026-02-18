@@ -96,11 +96,9 @@ const App = ({ coordinates }: { coordinates: MarkerType[] }) => {
     const [currentLocation, setCurrentLocation] = useState<{
         lat: number;
         lng: number;
-    }>({
-        lat: 0,
-        lng: 0,
-    });
+    } | null>(null);
     const toastRef = useRef<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
         if (toastRef.current) return;
@@ -150,6 +148,7 @@ const App = ({ coordinates }: { coordinates: MarkerType[] }) => {
                     lat: position.coords.latitude,
                     lng: position.coords.longitude,
                 });
+                setLoading(false);
             },
             () => {
                 toast.error('Ops, something went wrong.', {
@@ -158,6 +157,7 @@ const App = ({ coordinates }: { coordinates: MarkerType[] }) => {
                     description:
                         'We could not get your current location. Please try again. Thank you!',
                 });
+                setLoading(false);
             },
             {
                 enableHighAccuracy: true,
@@ -239,6 +239,17 @@ const App = ({ coordinates }: { coordinates: MarkerType[] }) => {
         setMarkerItem(marker);
     };
 
+    if (loading) {
+        return (
+            <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm">
+                <div className="h-16 w-16 animate-spin rounded-full border-4 border-white border-t-transparent"></div>
+                <p className="mt-6 text-lg font-medium text-white">
+                    Getting your location...
+                </p>
+            </div>
+        );
+    }
+
     return (
         <div style={{ height: '100vh', width: '100%' }}>
             <AlertDialog open={open} onOpenChange={setOpen}>
@@ -291,11 +302,11 @@ const App = ({ coordinates }: { coordinates: MarkerType[] }) => {
             </AlertDialog>
             <MapContainer
                 center={
-                    coordinates?.length > 0
-                        ? coordinates[0]
+                    currentLocation
+                        ? [currentLocation?.lat, currentLocation?.lng]
                         : [12.157802, 122.705489]
                 }
-                zoom={7}
+                zoom={currentLocation ? 20 : 7}
                 style={{ height: '100%', width: '100%' }}
                 attributionControl={false}
             >
@@ -338,11 +349,12 @@ const App = ({ coordinates }: { coordinates: MarkerType[] }) => {
                         addMarker(latlng);
                     }}
                 />
-                <Marker
-                    position={currentLocation}
-                    icon={L.divIcon({
-                        className: 'animate-pulse',
-                        html: `<div style="
+                <Activity mode={currentLocation ? 'visible' : 'hidden'}>
+                    <Marker
+                        position={currentLocation as MarkerType}
+                        icon={L.divIcon({
+                            className: 'animate-pulse',
+                            html: `<div style="
                                 width: 24px;
                                 height: 24px;
                                 background: #2563eb;
@@ -350,10 +362,11 @@ const App = ({ coordinates }: { coordinates: MarkerType[] }) => {
                                 border: 4px solid white;
                                 box-shadow: 0 0 0 4px rgba(37,99,235,0.3);
                                 "></div>`,
-                        iconSize: [32, 32],
-                        iconAnchor: [16, 16],
-                    })}
-                />
+                            iconSize: [32, 32],
+                            iconAnchor: [16, 16],
+                        })}
+                    />
+                </Activity>
 
                 {coordinates?.map((m, index) => (
                     <Marker
